@@ -112,50 +112,45 @@ export default function PortfolioPage() {
         {/* About Section - Apply fade-in */}
         <section id="about" className="mb-16 md:mb-24 scroll-mt-20">
           {/* Apply transition and opacity classes */}
-          <Link 
-            href="/boasetoken" 
-            legacyBehavior
-          >
-            <a 
-              className="block group" 
-              title="Learn more about the $BOASE Token on the /boasetoken page"
-            >
-              <div 
-                className={`relative bg-white dark:bg-black p-6 md:p-8 border border-gray-200 dark:border-gray-800 shadow-md dark:shadow-xl 
-                           transition-all duration-300 ease-in-out ${isAboutVisible ? 'opacity-100' : 'opacity-0'} 
-                           cursor-pointer 
-                           hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-2xl dark:hover:shadow-sky-700/20 
-                           transform hover:scale-[1.01] group-hover:brightness-105 dark:group-hover:brightness-110`}
+          <div className={`relative bg-white dark:bg-black p-6 md:p-8 border border-gray-200 dark:border-gray-800 shadow-md dark:shadow-xl transition-opacity duration-700 ease-in-out ${isAboutVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <Link href="/boasetoken" className="block group">
+              <h1 
+                className="relative text-3xl md:text-4xl text-white mb-4 font-mono min-h-[2.5rem] 
+                           p-3 rounded-lg cursor-pointer 
+                           bg-gradient-to-br from-gray-800 via-gray-900 to-black 
+                           dark:from-gray-700 dark:via-gray-800 dark:to-black 
+                           hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 
+                           dark:hover:from-gray-600 dark:hover:via-gray-700 dark:hover:to-gray-800 
+                           hover:shadow-xl hover:shadow-sky-600/30 transform hover:scale-[1.02] transition-all duration-200 ease-in-out"
               >
-                <h1 className="relative text-3xl md:text-4xl text-black dark:text-white mb-4 font-mono min-h-[2.5rem]">
-                    <span className="invisible">{`$${portfolioData.about.name}`}</span>
-                    <span className="absolute inset-0">
-                      <CharacterCycle text={`$${portfolioData.about.name}`} cycleDuration={40} /> 
-                    </span>
-                </h1>
-                <p className="relative text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-4">
-                  <span className="invisible">{portfolioData.about.tagline}</span>
-                  <span className="absolute inset-0">
-                    <CharacterCycle text={portfolioData.about.tagline} cycleDuration={20} />
+                  <span className="invisible">{`$${portfolioData.about.name}`}</span>
+                  <span className="absolute inset-0 flex items-center justify-center ">
+                    {/* Ensure CharacterCycle text is white or contrasts with new background */}
+                    <CharacterCycle text={`$${portfolioData.about.name}`} cycleDuration={40} /> 
                   </span>
-                </p>
-                <p className="relative text-base text-gray-600 dark:text-gray-400 mb-6 whitespace-pre-line">
-                   <span className="invisible">{portfolioData.about.bio}</span>
-                   <span className="absolute inset-0">
-                     <CharacterCycle text={portfolioData.about.bio} cycleDuration={5} />
-                  </span>
-                </p>
-                <div className="flex space-x-4 mb-6">
-                  <a href={portfolioData.about.socials.github} target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
-                    <FaGithub size={24} />
-                  </a>
-                  <a href={portfolioData.about.socials.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
-                    <FaLinkedin size={24} /> 
-                  </a>
-                </div>
-              </div>
-            </a>
-          </Link>
+              </h1>
+            </Link>
+            <p className="relative text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-4 pt-4">
+              <span className="invisible">{portfolioData.about.tagline}</span>
+              <span className="absolute inset-0">
+                <CharacterCycle text={portfolioData.about.tagline} cycleDuration={20} />
+              </span>
+            </p>
+            <p className="relative text-base text-gray-600 dark:text-gray-400 mb-6 whitespace-pre-line">
+               <span className="invisible">{portfolioData.about.bio}</span>
+               <span className="absolute inset-0">
+                 <CharacterCycle text={portfolioData.about.bio} cycleDuration={5} />
+                </span>
+            </p>
+            <div className="flex space-x-4 mb-6">
+              <a href={portfolioData.about.socials.github} target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+                <FaGithub size={24} />
+              </a>
+              <a href={portfolioData.about.socials.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+                <FaLinkedin size={24} /> 
+              </a>
+            </div>
+          </div>
         </section>
 
         {/* eslint-disable-next-line react/jsx-no-comment-textnodes */}

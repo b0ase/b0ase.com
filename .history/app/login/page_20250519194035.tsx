@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import getSupabaseBrowserClient from '@/lib/supabase/client';
-import { FaGoogle, FaEnvelope, FaLock, FaUserPlus, FaEye, FaEyeSlash, FaGithub, FaTwitter, FaEthereum, FaBitcoin, FaWallet } from 'react-icons/fa';
+import { FaGoogle, FaEnvelope, FaLock, FaUserPlus, FaEye, FaEyeSlash, FaGithub, FaTwitter, FaCreditCard, FaEthereum, FaBitcoin } from 'react-icons/fa';
 import { SiSolana } from 'react-icons/si';
 import { useRouter } from 'next/navigation';
 
@@ -416,24 +416,6 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
-            onClick={handleGitHubSignIn}
-            disabled={isLoading || isAuthProcessing}
-            className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-sky-500 disabled:opacity-50 transition-colors"
-          >
-            <FaGithub className="mr-2 -ml-1 w-5 h-5" />
-            Sign in with GitHub
-          </button>
-          <button
-            type="button"
-            onClick={handleXSignIn}
-            disabled={isLoading || isAuthProcessing}
-            className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-sky-500 disabled:opacity-50 transition-colors"
-          >
-            <FaTwitter className="mr-2 -ml-1 w-5 h-5" />
-            Sign in with X.com
-          </button>
-          <button
-            type="button"
             onClick={handlePhantomSignIn}
             disabled={isLoading || isAuthProcessing}
             className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-sky-500 disabled:opacity-50 transition-colors"
@@ -443,12 +425,30 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
+            onClick={handleGitHubSignIn}
+            disabled={isLoading || isAuthProcessing}
+            className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-sky-500 disabled:opacity-50 transition-colors"
+          >
+            <FaGithub className="mr-2 -ml-1 w-5 h-5" />
+            Sign in with GitHub
+          </button>
+          <button
+            type="button"
             onClick={handleHandCashSignIn}
             disabled={isLoading || isAuthProcessing}
             className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-sky-500 disabled:opacity-50 transition-colors"
           >
-            <FaBitcoin className="mr-2 -ml-1 w-5 h-5" />
+            <FaCreditCard className="mr-2 -ml-1 w-5 h-5" />
             Sign in with HandCash
+          </button>
+          <button
+            type="button"
+            onClick={handleXSignIn}
+            disabled={isLoading || isAuthProcessing}
+            className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-sky-500 disabled:opacity-50 transition-colors"
+          >
+            <FaTwitter className="mr-2 -ml-1 w-5 h-5" />
+            Sign in with X.com
           </button>
           <button
             type="button"

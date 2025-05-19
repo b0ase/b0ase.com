@@ -64,9 +64,10 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   const supabase = getSupabaseBrowserClient(); // Initialize Supabase client for logout
 
   // Call useProfileData without arguments
-  const {
-    profile,
-    loading: profileLoading,
+  const { 
+    profile, 
+    loading: profileLoading, 
+    showWelcomeCard, // Assuming this is the state for welcome card visibility
     handleDismissWelcomeCard,
     handleUpdateProfile, // Added
     saving // Added
@@ -210,9 +211,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   //  but here we are certain it's not public and not an auth flow page)
   if (isAppPage && isAuthenticated) {
     // Determine initial expansion state for AppSubNavbar based on path
-    // Since showWelcomeCard is removed, AppSubNavbar on /profile will default to expanded.
-    // If a different logic is needed, it should be implemented here.
-    const subNavbarInitialExpanded = (pathname === '/profile');
+    const subNavbarInitialExpanded = (pathname === '/profile') 
+      ? (showWelcomeCard ?? true) 
+      : false;
 
     return (
       <MyCtxProvider>

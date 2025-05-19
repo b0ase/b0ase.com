@@ -26,6 +26,7 @@ interface Profile {
   dollar_handle?: string | null;
   token_name?: string | null;
   supply?: string | null;
+  has_seen_welcome_card?: boolean | null;
 }
 
 interface ProfileForUpdate {
@@ -46,6 +47,7 @@ interface ProfileForUpdate {
   dollar_handle?: string | null;
   token_name?: string | null;
   supply?: string | null;
+  has_seen_welcome_card?: boolean | null;
   updated_at: string;
 }
 
@@ -153,6 +155,7 @@ export default function useProfileData() {
 
   const [customSkillInput, setCustomSkillInput] = useState<string>('');
   const [skillChoiceInAdder, setSkillChoiceInAdder] = useState<string>('');
+  const [showWelcomeCard, setShowWelcomeCard] = useState<boolean>(true);
 
   // useEffect for initial user fetch and auth state changes
   useEffect(() => {
@@ -221,12 +224,14 @@ export default function useProfileData() {
         setSuccessMessage(null);
         setAvatarUploadError(null);
         setError(null);
+        setShowWelcomeCard(true);
         if (pathname !== '/login' && !isPublicPage) {
             router.push('/login');
         }
       } else if (event === 'SIGNED_IN' && currentUser) {
         console.log('[useProfileData] User signed in:', currentUser.id);
         setNewSupply((profile as any)?.supply || '1,000,000,000');
+        setShowWelcomeCard(!((profile as any)?.has_seen_welcome_card));
 
         // Step 2: Fetch User's Skills
         console.log("[useProfileData] Fetching user skills for user:", currentUser.id);
@@ -391,6 +396,7 @@ export default function useProfileData() {
           } else {
             setError(`Failed to load profile: ${profileError.message}`);
           }
+          setShowWelcomeCard(true); // Show welcome if profile error
         } else if (profileData) {
           console.log("[useProfileData] Profile data fetched:", profileData);
           setProfile(profileData as Profile);
@@ -411,6 +417,7 @@ export default function useProfileData() {
           setNewDollarHandle(profileData.dollar_handle || '');
           setNewTokenName(profileData.token_name || '');
           setNewSupply(profileData.supply || '1,000,000,000');
+          setShowWelcomeCard(profileData.has_seen_welcome_card === null || profileData.has_seen_welcome_card === undefined ? true : !profileData.has_seen_welcome_card);
 
           // Step 2: Fetch User's Skills
           console.log("[useProfileData] Fetching user skills for user:", user.id);
@@ -965,10 +972,6 @@ export default function useProfileData() {
 
   const handleDismissWelcomeCard = async () => {
     if (!user || !profile) return;
-    // This function is now effectively a no-op as has_seen_welcome_card functionality is removed.
-    console.warn('[useProfileData] handleDismissWelcomeCard called, but has_seen_welcome_card functionality is removed.');
-
-    /* // Original logic relying on has_seen_welcome_card & setShowWelcomeCard
     if (profile.has_seen_welcome_card) {
       setShowWelcomeCard(false); return;
     }
@@ -983,7 +986,6 @@ export default function useProfileData() {
       setSuccessMessage('Welcome card dismissed.');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) { setError('Failed to update welcome card status.'); }
-    */
   };
 
   return {
@@ -1022,6 +1024,7 @@ export default function useProfileData() {
     errorUserTeams,
     customSkillInput,
     skillChoiceInAdder,
+    showWelcomeCard,
     setNewUsername,
     setNewDisplayName,
     setNewFullName,

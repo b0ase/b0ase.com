@@ -447,7 +447,7 @@ export default function LoginPage() {
             disabled={isLoading || isAuthProcessing}
             className="w-full inline-flex items-center justify-center px-4 py-2.5 border border-gray-700 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-sky-500 disabled:opacity-50 transition-colors"
           >
-            <FaBitcoin className="mr-2 -ml-1 w-5 h-5" />
+            <FaWallet className="mr-2 -ml-1 w-5 h-5" />
             Sign in with HandCash
           </button>
           <button

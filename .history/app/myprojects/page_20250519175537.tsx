@@ -48,7 +48,7 @@ interface ClientProject {
   user_id: string; // ID of the user who created/owns the project (from 'clients' table)
   created_at: string; // For sorting
   currentUserRole?: ProjectRole | string; // Role of the currently logged-in user for this project
-  // order_index?: number | null; // Removed as it's not in the DB function's return
+  order_index?: number | null; // Added for explicit ordering
 }
 
 const badge1Options = ['Pending_setup', 'Planning', 'In Development', 'Live', 'Maintenance', 'On Hold', 'Archived', 'Needs Review', 'Completed', 'Requires Update']; // Added Pending_setup
@@ -334,8 +334,16 @@ export default function MyProjectsPage() {
       if (rpcError) throw rpcError;
       
       if (data) {
-        // Data is pre-sorted by created_at DESC from the SQL function
-        setProjects(data as ClientProject[]);
+         // Sort by order_index, then by created_at if order_index is null or same
+        const sortedData = data.sort((a: ClientProject, b: ClientProject) => {
+            const orderA = a.order_index ?? Infinity;
+            const orderB = b.order_index ?? Infinity;
+            if (orderA !== orderB) {
+                return orderA - orderB;
+            }
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+        setProjects(sortedData as ClientProject[]);
       } else {
         setProjects([]);
       }
@@ -444,29 +452,29 @@ export default function MyProjectsPage() {
 
       // Update order_index in Supabase for all affected projects
       // This can be a batch update for efficiency
-      // const updates = newOrder.map((project, index) => ({
-      //   id: project.id,
-      //   order_index: index,
-      //   updated_at: new Date().toISOString() 
-      // }));
+      const updates = newOrder.map((project, index) => ({
+        id: project.id,
+        order_index: index,
+        updated_at: new Date().toISOString() 
+      }));
 
-      // try {
-      //   // Supabase doesn't have a direct batch update with different values per row in JS client like .upsert()
-      //   // We have to do individual updates or use a stored procedure.
-      //   // For simplicity, using individual updates. For many items, a stored procedure would be better.
-      //   for (const update of updates) {
-      //     const { error } = await supabase
-      //       .from('client_projects') // Ensure this table name is correct, might be 'clients'
-      //       .update({ order_index: update.order_index, updated_at: update.updated_at })
-      //       .eq('id', update.id);
-      //     if (error) throw error;
-      //   }
-      // } catch (e:any) {
-      //   console.error("Error updating project order:", e);
-      //   setError("Failed to save new project order. Please refresh.");
-      //   // Optionally revert to original order or fetch again
-      //   fetchProjects(); 
-      // }
+      try {
+        // Supabase doesn't have a direct batch update with different values per row in JS client like .upsert()
+        // We have to do individual updates or use a stored procedure.
+        // For simplicity, using individual updates. For many items, a stored procedure would be better.
+        for (const update of updates) {
+          const { error } = await supabase
+            .from('client_projects')
+            .update({ order_index: update.order_index, updated_at: update.updated_at })
+            .eq('id', update.id);
+          if (error) throw error;
+        }
+      } catch (e:any) {
+        console.error("Error updating project order:", e);
+        setError("Failed to save new project order. Please refresh.");
+        // Optionally revert to original order or fetch again
+        fetchProjects(); 
+      }
     }
   };
 

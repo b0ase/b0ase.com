@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaPlusSquare, FaUsers, FaProjectDiagram, FaUserPlus, FaBriefcase, FaChevronDown, FaChevronUp, FaRocket, FaCubes, FaUserSecret, FaSave, FaSpinner } from 'react-icons/fa';
+import { FaPlusSquare, FaUsers, FaProjectDiagram, FaUserPlus, FaBriefcase, FaChevronDown, FaChevronUp, FaRocket, FaCubes, FaUserSecret } from 'react-icons/fa';
 
 const navLinks = [
   { href: '/projects/new', label: 'Start a New Project', icon: FaPlusSquare },
@@ -21,11 +21,9 @@ const welcomeSubtitle = "Welcome to b0ase.com! This is your hub to bring your di
 interface AppSubNavbarProps {
   initialIsExpanded: boolean;
   onCollapse: () => void;
-  onSaveProfile?: (e: React.FormEvent) => Promise<void>;
-  isSavingProfile?: boolean;
 }
 
-export default function AppSubNavbar({ initialIsExpanded, onCollapse, onSaveProfile, isSavingProfile }: AppSubNavbarProps) {
+export default function AppSubNavbar({ initialIsExpanded, onCollapse }: AppSubNavbarProps) {
   const pathname = usePathname() ?? '';
   const [isExpanded, setIsExpanded] = useState(initialIsExpanded);
 
@@ -42,19 +40,19 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, onSaveProf
   };
 
   return (
-    <div className={`bg-black text-gray-300 shadow-md sticky top-28 z-30 transition-all duration-300 ease-in-out`}>
-      <div className="container mx-auto px-4 bg-gradient-to-br from-sky-600 via-sky-700 to-blue-800 rounded-xl shadow-2xl">
+    <div className={`bg-gradient-to-r from-black to-gray-800 text-gray-300 shadow-md sticky top-28 z-30 transition-all duration-300 ease-in-out`}>
+      <div className="container mx-auto px-4">
         {isExpanded && (
-          <div className="py-6 text-center border-b border-gray-700/50">
-            <FaRocket className="w-12 h-12 mx-auto mb-4 text-sky-300 opacity-90" />
+          <div className="py-6 text-center border-b border-gray-800">
+            <FaRocket className="w-12 h-12 mx-auto mb-4 text-sky-500 opacity-75" />
             <h2 className="text-2xl font-bold text-white mb-2">{welcomeTitle}</h2>
-            <p className="text-md text-sky-100/90 mb-6 max-w-3xl mx-auto">{welcomeSubtitle}</p>
+            <p className="text-md text-gray-400 mb-6 max-w-3xl mx-auto">{welcomeSubtitle}</p>
           </div>
         )}
         
-        <div className={`flex items-center justify-between py-3 ${isExpanded ? '' : 'border-t border-gray-700/50'}`}>
-          <FaRocket className="h-6 w-6 text-sky-300 mr-3 flex-shrink-0" />
-          <div className={`flex items-center flex-wrap gap-2 sm:gap-3 md:gap-4 flex-grow`}>
+        <div className={`flex items-center justify-between py-3 ${isExpanded ? '' : 'border-t border-gray-800'}`}>
+          <FaRocket className="h-6 w-6 text-sky-500 mr-3 flex-shrink-0" />
+          <div className={`flex items-center space-x-2 sm:space-x-3 md:space-x-4 overflow-x-auto whitespace-nowrap flex-grow`}>
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.href !== '/');
               return (
@@ -63,8 +61,8 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, onSaveProf
                   href={link.href}
                   className={`px-2 py-1.5 md:px-3 md:py-2 rounded-md text-xs sm:text-sm font-medium flex items-center transition-colors duration-150 ease-in-out 
                     ${isActive
-                      ? 'bg-sky-500 text-white shadow-sm'
-                      : 'bg-white/10 hover:bg-white/20 text-sky-100 hover:text-white'
+                      ? 'bg-sky-600 text-white' 
+                      : 'bg-gray-800 hover:bg-gray-700 hover:text-white'
                     }`}
                 >
                   <link.icon className={`mr-1 sm:mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-300'}`} />
@@ -73,33 +71,12 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, onSaveProf
               );
             })}
           </div>
-          {pathname === '/profile' && onSaveProfile && (
-            <button
-              form="profile-form"
-              type="submit"
-              disabled={isSavingProfile}
-              onClick={(e) => {
-                // We don't call onSaveProfile directly here if type="submit" and form="profile-form" is used.
-                // The form's onSubmit will be triggered.
-                // If we needed to do something *before* submission, we could call onSaveProfile.
-                // For now, let the form handle it.
-              }}
-              className="ml-3 px-3 py-1.5 md:px-4 md:py-2 rounded-md text-xs sm:text-sm font-medium flex items-center bg-green-500 hover:bg-green-600 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out flex-shrink-0"
-            >
-              {isSavingProfile ? (
-                <FaSpinner className="animate-spin mr-1.5 h-4 w-4" />
-              ) : (
-                <FaSave className="mr-1.5 h-4 w-4" />
-              )}
-              {isSavingProfile ? 'Saving...' : 'Save Profile'}
-            </button>
-          )}
           <button 
             onClick={handleToggle} 
             className="ml-4 p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 flex-shrink-0"
             aria-label={isExpanded ? "Collapse navbar" : "Expand navbar"}
           >
-            {isExpanded ? <FaChevronUp className="h-5 w-5 text-sky-100" /> : <FaChevronDown className="h-5 w-5 text-sky-100" />}
+            {isExpanded ? <FaChevronUp className="h-5 w-5 text-gray-400" /> : <FaChevronDown className="h-5 w-5 text-gray-400" />}
           </button>
         </div>
       </div>

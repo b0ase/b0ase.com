@@ -54,7 +54,7 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, onSaveProf
         
         <div className={`flex items-center justify-between py-3 ${isExpanded ? '' : 'border-t border-gray-700/50'}`}>
           <FaRocket className="h-6 w-6 text-sky-300 mr-3 flex-shrink-0" />
-          <div className={`flex items-center flex-wrap gap-2 sm:gap-3 md:gap-4 flex-grow`}>
+          <div className={`flex items-center space-x-2 sm:space-x-3 md:space-x-4 overflow-x-auto whitespace-nowrap flex-grow`}>
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.href !== '/');
               return (

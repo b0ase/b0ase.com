@@ -965,10 +965,6 @@ export default function useProfileData() {
 
   const handleDismissWelcomeCard = async () => {
     if (!user || !profile) return;
-    // This function is now effectively a no-op as has_seen_welcome_card functionality is removed.
-    console.warn('[useProfileData] handleDismissWelcomeCard called, but has_seen_welcome_card functionality is removed.');
-
-    /* // Original logic relying on has_seen_welcome_card & setShowWelcomeCard
     if (profile.has_seen_welcome_card) {
       setShowWelcomeCard(false); return;
     }
@@ -983,7 +979,6 @@ export default function useProfileData() {
       setSuccessMessage('Welcome card dismissed.');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) { setError('Failed to update welcome card status.'); }
-    */
   };
 
   return {
