@@ -92,11 +92,10 @@ interface SortableManagedProjectBarProps {
   selectedProjectId: string | null;
   onToggleExpand: (projectId: string) => void;
   user: User | null; // Current logged-in user
-  currentUserRole: string | null; // For edit permissions
   // Props for expanded content (member list and form)
   teamMembers: TeamMember[];
   isLoadingTeamMembers: boolean;
-  errorMembers: string | null;
+  errorMembers: string | null; // Assuming you have an error state for members section
   openRemoveConfirmModal: (member: TeamMember, projId: string, projName: string) => void;
   platformUsers: PlatformUser[];
   isLoadingPlatformUsers: boolean;
@@ -106,16 +105,9 @@ interface SortableManagedProjectBarProps {
   setNewMemberRole: (role: ProjectRole) => void;
   handleAddNewMember: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   isAddingMember: boolean;
-  isRemovingMember: boolean;
+  isRemovingMember: boolean; // To disable remove buttons during other operations
+  // Role fetching and styling helpers (can be passed or accessed via context if preferred)
   getProjectRoleStyle: (role: string | ProjectRole | undefined) => string;
-  // Inline editing props
-  editingProjectId: string | null;
-  currentEditingName: string;
-  isSavingProjectName: boolean;
-  onStartEdit: (projectId: string, currentName: string) => void;
-  onCancelEdit: () => void;
-  onSaveProjectName: () => Promise<void>;
-  onCurrentEditingNameChange: (name: string) => void;
 }
 
 function SortableManagedProjectBar({
@@ -123,7 +115,6 @@ function SortableManagedProjectBar({
   selectedProjectId,
   onToggleExpand,
   user,
-  currentUserRole,
   teamMembers,
   isLoadingTeamMembers,
   errorMembers,
@@ -137,14 +128,7 @@ function SortableManagedProjectBar({
   handleAddNewMember,
   isAddingMember,
   isRemovingMember,
-  getProjectRoleStyle,
-  editingProjectId,
-  currentEditingName,
-  isSavingProjectName,
-  onStartEdit,
-  onCancelEdit,
-  onSaveProjectName,
-  onCurrentEditingNameChange
+  getProjectRoleStyle
 }: SortableManagedProjectBarProps) {
   const { 
     attributes,
@@ -185,61 +169,17 @@ function SortableManagedProjectBar({
           >
             {mp.name}
           </span>
-          {currentUserRole === 'Admin' && editingProjectId !== mp.id && (
-            <button 
-              onClick={(e) => { e.stopPropagation(); onStartEdit(mp.id, mp.name); }}
-              className="ml-2 p-1.5 text-gray-400 hover:text-sky-400 transition-colors rounded focus:outline-none focus:ring-1 focus:ring-sky-500"
-              title="Edit project name"
-            >
-              <FaEdit />
-            </button>
-          )}
         </div>
-
-        {/* Edit mode UI for project name */}
-        {editingProjectId === mp.id && currentUserRole === 'Admin' && (
-          <div className="flex items-center flex-grow ml-2 mr-2"> {/* Takes up project name space */}
-            <input 
-              type="text" 
-              value={currentEditingName}
-              onChange={(e) => onCurrentEditingNameChange(e.target.value)}
-              className="flex-grow bg-gray-700 text-white border border-sky-500 rounded-md px-2 py-1 text-lg focus:ring-1 focus:ring-sky-400 focus:border-sky-400"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') onSaveProjectName();
-                if (e.key === 'Escape') onCancelEdit();
-              }}
-            />
-            <button 
-              onClick={(e) => { e.stopPropagation(); onSaveProjectName(); }}
-              disabled={isSavingProjectName || !currentEditingName.trim() || currentEditingName.trim().length < 3}
-              className="ml-2 px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white text-sm rounded-md disabled:opacity-60 flex items-center"
-            >
-              {isSavingProjectName ? <FaSpinner className="animate-spin mr-1.5" /> : <FaEdit className="mr-1.5" />} Save
-            </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); onCancelEdit(); }}
-              disabled={isSavingProjectName}
-              className="ml-2 px-3 py-1.5 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded-md disabled:opacity-60"
-            >
-              Cancel
-            </button>
+        <div className="flex items-center space-x-4 flex-shrink-0 mx-4">
+          <div className="flex flex-col items-start min-w-[120px]">
+            <span className="text-xs text-gray-500">Client</span>
+            <span className="text-sm text-gray-200 truncate" title={mp.clientName || 'N/A'}>{mp.clientName || '---'}</span>
           </div>
-        )}
-
-        {/* Middle: Client and PM info - only show if NOT editing project name */}
-        {editingProjectId !== mp.id && (
-          <div className="flex items-center space-x-4 flex-shrink-0 mx-4">
-            <div className="flex flex-col items-start min-w-[120px]">
-              <span className="text-xs text-gray-500">Client</span>
-              <span className="text-sm text-gray-200 truncate" title={mp.clientName || 'N/A'}>{mp.clientName || '---'}</span>
-            </div>
-            <div className="flex flex-col items-start min-w-[120px]">
-              <span className="text-xs text-gray-500">Project Manager</span>
-              <span className="text-sm text-gray-200 truncate" title={mp.projectManagerName || 'N/A'}>{mp.projectManagerName || '---'}</span>
-            </div>
+          <div className="flex flex-col items-start min-w-[120px]">
+            <span className="text-xs text-gray-500">Project Manager</span>
+            <span className="text-sm text-gray-200 truncate" title={mp.projectManagerName || 'N/A'}>{mp.projectManagerName || '---'}</span>
           </div>
-        )}
+        </div>
         <div className="flex items-center flex-shrink-0 ml-auto">
           <span 
             onClick={() => onToggleExpand(mp.id)}
@@ -380,14 +320,8 @@ export default function TeamPage() {
       if (updateError) throw updateError;
 
       setSuccessMessage('Project name updated successfully!');
-      
-      // Update the project name in the local state to preserve order
-      setManagedProjects(prevProjects => 
-        prevProjects.map(p => 
-          p.id === editingProjectId ? { ...p, name: currentEditingName.trim() } : p
-        )
-      );
-
+      // Refresh the project list to show the new name
+      await fetchManagedProjects(user.id);
       handleCancelEdit(); // Reset editing state
     } catch (e: any) {
       setError(`Failed to save project name: ${e.message}`);
@@ -671,28 +605,20 @@ export default function TeamPage() {
                       selectedProjectId={selectedProjectId}
                       onToggleExpand={() => setSelectedProjectId(prev => prev === mp.id ? null : mp.id)}
                       user={user}
-                      currentUserRole={currentUserRole}
-                      teamMembers={teamMembers.filter(tm => tm.project_id === mp.id)}
-                      isLoadingTeamMembers={isLoadingTeamMembers && selectedProjectId === mp.id}
-                      errorMembers={selectedProjectId === mp.id ? errorMembers : null}
+                      teamMembers={teamMembers.filter(tm => tm.project_id === mp.id)} // Pass filtered members for THIS project
+                      isLoadingTeamMembers={isLoadingTeamMembers && selectedProjectId === mp.id} // Only loading if this project is selected
+                      errorMembers={selectedProjectId === mp.id ? errorMembers : null} // Pass error only if this project is selected
                       openRemoveConfirmModal={openRemoveConfirmModal}
                       platformUsers={platformUsers}
                       isLoadingPlatformUsers={isLoadingPlatformUsers}
-                      selectedPlatformUserId={selectedPlatformUserId}
+                      selectedPlatformUserId={selectedPlatformUserId} // These form states are shared for the currently selected project
                       setSelectedPlatformUserId={setSelectedPlatformUserId}
                       newMemberRole={newMemberRole}
                       setNewMemberRole={setNewMemberRole}
                       handleAddNewMember={handleAddNewMember}
                       isAddingMember={isAddingMember && selectedProjectId === mp.id}
-                      isRemovingMember={isRemovingMember && selectedProjectId === mp.id}
-                      getProjectRoleStyle={getProjectRoleStyle}
-                      editingProjectId={editingProjectId}
-                      currentEditingName={currentEditingName}
-                      isSavingProjectName={isSavingProjectName}
-                      onStartEdit={handleStartEdit}
-                      onCancelEdit={handleCancelEdit}
-                      onSaveProjectName={handleSaveProjectName}
-                      onCurrentEditingNameChange={setCurrentEditingName}
+                      isRemovingMember={isRemovingMember && selectedProjectId === mp.id} // Pass relevant states
+                      getProjectRoleStyle={getProjectRoleStyle} // Pass helper
                     />
                   ))}
                 </div>

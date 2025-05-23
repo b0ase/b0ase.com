@@ -194,7 +194,7 @@ function SortableProjectCard({
     isDragging 
   } = useSortable({ id: project.id });
 
-  const projectId = project.id;
+  const projectSlug = project.project_slug;
   const projectUrl = project.url;
 
   const style = {
@@ -221,8 +221,8 @@ function SortableProjectCard({
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
         <div className="flex items-center gap-x-3 flex-wrap">
-          {/* Project Name now always links to internal project page using project.id */}
-          <Link href={`/myprojects/${projectId}`} legacyBehavior>
+          {/* Project Name now always links to internal project page */}
+          <Link href={`/myprojects/${project.project_slug}`} legacyBehavior>
             <a className="text-xl font-semibold text-sky-400 hover:text-sky-300 hover:underline">
               {project.name}
             </a>
@@ -240,11 +240,9 @@ function SortableProjectCard({
               <FaEdit className="w-4 h-4" />
             </button>
           )}
-          {/* The existing general edit link remains, but will also use projectId if slug is absent */}
-          {/* We need to decide if this edit link should go to a page based on ID or if we need a slug later */}
-          {/* For now, let's assume /edit page also works with ID or we handle it there */} 
-          <Link href={`/myprojects/${projectId}/edit`} passHref legacyBehavior>
-            <a className="text-gray-400 hover:text-sky-400 transition-colors" title="Edit Project Details">
+          {/* The existing general edit link remains */}
+          <Link href={`/myprojects/${project.project_slug}/edit`} passHref legacyBehavior>
+            <a className="text-gray-400 hover:text-sky-400 transition-colors" title="Edit Project">
               <FaEdit className="w-4 h-4" />
             </a>
           </Link>
@@ -264,7 +262,7 @@ function SortableProjectCard({
 
       {/* Primary Action Buttons - Grouped separately for clarity */}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-4">
-        <Link href={`/myprojects/${projectId}`} legacyBehavior>
+        <Link href={`/myprojects/${projectSlug}`} legacyBehavior>
           <a 
             onClick={(e) => e.stopPropagation()}
             className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-700 text-sm font-medium shadow-sm text-gray-300 bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 focus:ring-offset-slate-900"
@@ -780,7 +778,7 @@ export default function MyProjectsPage() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={projects.map(p => p.id)} strategy={verticalListSortingStrategy}>
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.map(project => (
                   <SortableProjectCard 
                     key={project.id} 

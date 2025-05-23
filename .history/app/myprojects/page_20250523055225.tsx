@@ -36,7 +36,7 @@ enum ProjectRole {
 interface ClientProject {
   id: string; // This will now be the projects.id
   name: string;
-  project_slug?: string | null; // MADE OPTIONAL - From projects table - IF IT EXISTS
+  project_slug: string; // From projects table
   status: string | null; // From projects table (or clients if overridden)
   project_brief?: string | null; // From projects table
   badge1?: string | null; // From projects table (or clients if overridden)
@@ -194,7 +194,7 @@ function SortableProjectCard({
     isDragging 
   } = useSortable({ id: project.id });
 
-  const projectId = project.id;
+  const projectSlug = project.project_slug;
   const projectUrl = project.url;
 
   const style = {
@@ -221,8 +221,8 @@ function SortableProjectCard({
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
         <div className="flex items-center gap-x-3 flex-wrap">
-          {/* Project Name now always links to internal project page using project.id */}
-          <Link href={`/myprojects/${projectId}`} legacyBehavior>
+          {/* Project Name now always links to internal project page */}
+          <Link href={`/myprojects/${project.project_slug}`} legacyBehavior>
             <a className="text-xl font-semibold text-sky-400 hover:text-sky-300 hover:underline">
               {project.name}
             </a>
@@ -240,11 +240,9 @@ function SortableProjectCard({
               <FaEdit className="w-4 h-4" />
             </button>
           )}
-          {/* The existing general edit link remains, but will also use projectId if slug is absent */}
-          {/* We need to decide if this edit link should go to a page based on ID or if we need a slug later */}
-          {/* For now, let's assume /edit page also works with ID or we handle it there */} 
-          <Link href={`/myprojects/${projectId}/edit`} passHref legacyBehavior>
-            <a className="text-gray-400 hover:text-sky-400 transition-colors" title="Edit Project Details">
+          {/* The existing general edit link remains */}
+          <Link href={`/myprojects/${project.project_slug}/edit`} passHref legacyBehavior>
+            <a className="text-gray-400 hover:text-sky-400 transition-colors" title="Edit Project">
               <FaEdit className="w-4 h-4" />
             </a>
           </Link>
@@ -264,7 +262,7 @@ function SortableProjectCard({
 
       {/* Primary Action Buttons - Grouped separately for clarity */}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-4">
-        <Link href={`/myprojects/${projectId}`} legacyBehavior>
+        <Link href={`/myprojects/${projectSlug}`} legacyBehavior>
           <a 
             onClick={(e) => e.stopPropagation()}
             className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-700 text-sm font-medium shadow-sm text-gray-300 bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 focus:ring-offset-slate-900"
@@ -413,11 +411,9 @@ function SortableProjectCard({
 
 export default function MyProjectsPage() {
   const supabase = createClientComponentClient();
-  const { session, isLoading: authLoading } = useAuth();
-  const authUser = session?.user;
-
+  const { user: authUser, isLoading: authLoading } = useAuth();
   const [projects, setProjects] = useState<ClientProject[]>([]);
-  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
@@ -448,117 +444,140 @@ export default function MyProjectsPage() {
   const fetchProjects = useCallback(async (userId: string) => {
     console.log("[MyProjectsPage] fetchProjects called with userId:", userId);
     if (!userId) {
-      console.log("[MyProjectsPage] fetchProjects: No userId provided, setting projects to empty.");
+      console.log("[MyProjectsPage] fetchProjects: No userId provided, setting projects to empty and isLoading to false.");
       setProjects([]);
-      setIsLoadingProjects(false);
+      setIsLoading(false);
       return;
     }
+    setIsLoading(true);
+    setError(null);
+    console.log("[MyProjectsPage] fetchProjects: Starting to fetch. isLoading set to true.");
 
-    console.log(`[MyProjectsPage] fetchProjects: Attempting to fetch projects for user ${userId} with restored fields (full function replacement, no project_slug).`);
     try {
-      const { data: projectsData, error: projectsError } = await supabase
-        .from('projects')
-        .select('id, name, owner_user_id, project_brief, status, badge2, badge3, badge4, badge5, created_at')
-        .eq('owner_user_id', userId);
+      const { data: allProjectsData, error: projectsError } = await supabase
+        .from('projects') 
+        .select(`
+          id,
+          name,
+          project_slug,
+          status,
+          project_brief,
+          badge1,
+          badge2,
+          badge3,
+          badge4,
+          badge5,
+          is_featured,
+          is_public,
+          owner_user_id,
+          created_at,
+          project_websites (url, type)
+        `);
 
-      console.log("[MyProjectsPage] fetchProjects: supabase.from('projects').select (no project_slug) result:", { projectsData, projectsError });
+      console.log("[MyProjectsPage] fetchProjects: supabase.from('projects').select result:", { allProjectsData, projectsError });
 
       if (projectsError) {
-        console.error("[MyProjectsPage] fetchProjects: Error fetching projects (restored fields):", projectsError);
-        setError(`Failed to load projects: ${projectsError.message}`);
+        console.error("[MyProjectsPage] fetchProjects: Error fetching projects:", projectsError);
+        setError('Failed to fetch projects.');
         setProjects([]);
-      } else if (projectsData) {
-        console.log("[MyProjectsPage] fetchProjects: Successfully fetched project data (restored fields):", projectsData);
-        
-        const transformedProjects: ClientProject[] = projectsData.map((p: any) => {
-          return {
-            id: p.id,
-            name: p.name,
-            status: p.status,
-            project_brief: p.project_brief,
-            badge1: p.status, // Use status for badge1
-            badge2: p.badge2,
-            badge3: p.badge3,
-            badge4: p.badge4,
-            badge5: p.badge5,
-            user_id: p.owner_user_id, // Critical for delete logic and role checks
-            created_at: p.created_at,
-            currentUserRole: p.owner_user_id === userId ? ProjectRole.Owner : undefined,
-            // Default/optional fields from ClientProject
-            description: p.project_brief, 
-            client_specific_status: null,
-            client_specific_badge1: null,
-            is_featured: false, 
-            is_public: false,
-            url: null, // Was from project_websites, keep null for now
-            logo_url: null,
-            primary_url: null,
-            project_type: null,
-            // owner_user_id is implicitly handled via user_id mapping for ClientProject purpose
-          };
-        });
-        
-        console.log("[MyProjectsPage] fetchProjects: Transformed projects (restored fields - full function):", transformedProjects);
-        setProjects(transformedProjects.sort((a, b) => getPriorityOrderValue(a.badge3 ?? null) - getPriorityOrderValue(b.badge3 ?? null) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
-        setError(null);
-      } else {
-        console.log("[MyProjectsPage] fetchProjects: No projects data and no error (restored fields).");
-        setProjects([]);
+        setIsLoading(false);
+        return;
       }
-    } catch (e: any) {
-      console.error("[MyProjectsPage] fetchProjects: Unexpected error during fetch (restored fields):", e);
-      setError(`An unexpected error occurred while fetching projects: ${e.message}`);
+
+      if (!allProjectsData) {
+        console.log("[MyProjectsPage] fetchProjects: No project data returned, setting projects to empty.");
+        setProjects([]);
+        setIsLoading(false); // Ensure loading is false if no data
+        return;
+      }
+
+      console.log(`[MyProjectsPage] fetchProjects: Fetched ${allProjectsData.length} raw projects. Starting processing.`);
+
+      const processedProjects = await Promise.all(allProjectsData.map(async (p: any) => {
+        let userRoleForProject: ProjectRole | string = '';
+        if (p.owner_user_id === userId) {
+          userRoleForProject = ProjectRole.Owner;
+        } else {
+          // console.log(`[MyProjectsPage] fetchProjects: Checking membership for project ${p.id}, user ${userId}`);
+          const { data: memberRole, error: memberError } = await supabase
+            .from('project_members')
+            .select('role')
+            .eq('project_id', p.id)
+            .eq('user_id', userId)
+            .single();
+          if (memberError && memberError.code !== 'PGRST116') { 
+            console.error(`[MyProjectsPage] fetchProjects: Error fetching role for user ${userId} in project ${p.id}:`, memberError);
+          } else if (memberRole) {
+            userRoleForProject = memberRole.role as ProjectRole | string;
+          }
+        }
+
+        const primaryWebsite = p.project_websites?.find((w: any) => w.type === 'primary') || p.project_websites?.[0];
+
+        return {
+          ...p,
+          url: primaryWebsite?.url || null,
+          currentUserRole: userRoleForProject,
+        } as ClientProject;
+      }));
+
+      console.log("[MyProjectsPage] fetchProjects: Processing complete. Processed projects count:", processedProjects.length);
+      setProjects(processedProjects.sort((a, b) => getPriorityOrderValue(a.badge3 ?? null) - getPriorityOrderValue(b.badge3 ?? null) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    } catch (err) {
+      console.error('[MyProjectsPage] fetchProjects: Error in try-catch block:', err);
+      setError('An unexpected error occurred while fetching projects.');
       setProjects([]);
     } finally {
-      console.log("[MyProjectsPage] fetchProjects: fetch attempt finished (restored fields), setting isLoadingProjects to false.");
-      setIsLoadingProjects(false);
+      console.log("[MyProjectsPage] fetchProjects: Finally block reached. Setting isLoading to false.");
+      setIsLoading(false);
     }
+    setUpdatingItemId(null);
   }, [supabase]);
 
   useEffect(() => {
-    console.log("[MyProjectsPage] useEffect triggered. session:", session, "authLoading:", authLoading, "authUser:", authUser);
-    if (!authLoading) { // Only proceed if auth loading is complete
-      if (authUser && authUser.id) { // Check authUser (derived from session)
-        console.log("[MyProjectsPage] useEffect: Auth loaded, user present. Calling fetchProjects and fetchUserPlatformRole.", authUser.id);
-        setIsLoadingProjects(true); 
-        fetchProjects(authUser.id);
-        
-        const fetchUserPlatformRole = async () => {
-          console.log("[MyProjectsPage] fetchUserPlatformRole called for user:", authUser.id);
-          // No need to check authUser again, already done
-          try {
-            console.log("[MyProjectsPage] fetchUserPlatformRole: Fetching role for user ID:", authUser.id);
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('role')
-              .eq('id', authUser.id)
-              .single();
+    console.log("[MyProjectsPage] useEffect triggered. authUser:", authUser, "authLoading:", authLoading);
+    if (authUser && !authLoading) {
+      console.log("[MyProjectsPage] useEffect: authUser present and not authLoading. Calling fetchProjects and fetchUserPlatformRole.");
+      fetchProjects(authUser.id);
+      const fetchUserPlatformRole = async () => {
+        console.log("[MyProjectsPage] fetchUserPlatformRole called.");
+        if (!authUser || !authUser.id) { // Check authUser.id explicitly
+          console.log("[MyProjectsPage] fetchUserPlatformRole: authUser or authUser.id is missing. authUser:", authUser);
+          return;
+        }
+        try {
+          console.log("[MyProjectsPage] fetchUserPlatformRole: Fetching role for user ID:", authUser.id);
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', authUser.id)
+            .single();
 
-            if (profileError) {
-              console.error("[MyProjectsPage] fetchUserPlatformRole: Error fetching profile:", profileError);
-              setError("Could not load user permissions. Please refresh.");
-              setCurrentUserPlatformRole(null);
-            } else {
-              console.log("[MyProjectsPage] fetchUserPlatformRole: Profile data received:", profile);
-              setCurrentUserPlatformRole(profile?.role || null);
-            }
-          } catch (error) {
-            console.error("[MyProjectsPage] fetchUserPlatformRole: Exception caught:", error);
-            setError("An error occurred while fetching user permissions.");
+          if (profileError) {
+            console.error("[MyProjectsPage] fetchUserPlatformRole: Error fetching profile:", profileError);
+            setError("Could not load user permissions. Please refresh.");
             setCurrentUserPlatformRole(null);
+          } else {
+            console.log("[MyProjectsPage] fetchUserPlatformRole: Profile data received:", profile);
+            setCurrentUserPlatformRole(profile?.role || null);
           }
-        };
-        fetchUserPlatformRole();
-      } else {
-        console.log("[MyProjectsPage] useEffect: Auth loaded, but NO user. Clearing projects, setting project loading to false.");
-        setProjects([]);
-        setIsLoadingProjects(false); // No projects to load as no user
-        setCurrentUserPlatformRole(null);
-      }
+        } catch (error) {
+          console.error("[MyProjectsPage] fetchUserPlatformRole: Exception caught:", error);
+          setError("An error occurred while fetching user permissions.");
+          setCurrentUserPlatformRole(null);
+        }
+      };
+      fetchUserPlatformRole();
     } else {
-      console.log("[MyProjectsPage] useEffect: Auth is still loading. Waiting...");
+      console.log("[MyProjectsPage] useEffect: Conditions not met. authUser:", authUser, "authLoading:", authLoading);
+      // If not authenticated and not loading, ensure projects are cleared and loading is false.
+      if (!authUser && !authLoading) {
+        console.log("[MyProjectsPage] useEffect: Not authenticated and not loading. Clearing projects and setting isLoading to false.");
+        setProjects([]);
+        setIsLoading(false);
+      }
     }
-  }, [session, authLoading, supabase, fetchProjects]); // Use session in dependency array
+  }, [authUser, authLoading, supabase, fetchProjects]);
 
   const handleBadgeChange = async (projectId: string, badgeKey: 'badge1' | 'badge2' | 'badge3' | 'badge4' | 'badge5', newValue: string | null) => {
     if (!authUser) {
@@ -625,7 +644,7 @@ export default function MyProjectsPage() {
   };
 
   const confirmDeleteProject = async () => {
-    if (!projectToDelete || !authUser || !authUser.id) {
+    if (!projectToDelete || !authUser) {
       setError("Error: Project ID missing or user not authenticated for deletion.");
       closeDeleteModal();
       return;
@@ -684,7 +703,7 @@ export default function MyProjectsPage() {
       setError("Project name cannot be empty.");
       return;
     }
-    // Use authUser derived from session for checks
+    // Ensure authUser and authUser.id are available and id is a string
     if (!authUser || typeof authUser.id !== 'string') { 
       setError("You must be logged in to edit a project name.");
       return;
@@ -721,22 +740,10 @@ export default function MyProjectsPage() {
     // setIsSavingNewName(false); // This is handled in closeEditNameModal or on error
   };
 
-  // Initial Auth Loading Check
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-black to-gray-950 text-gray-300 flex flex-col items-center justify-center">
-        <p className="text-xl">Authenticating...</p> 
-        {/* You could add a spinner icon here */}
-      </div>
-    );
-  }
-
-  // Projects Loading Check (after auth is resolved)
-  if (isLoadingProjects) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-950 via-black to-gray-950 text-gray-300 flex flex-col items-center justify-center">
         <p className="text-xl">Loading projects...</p>
-         {/* You could add a spinner icon here */}
       </div>
     );
   }
@@ -761,12 +768,11 @@ export default function MyProjectsPage() {
 
         {error && <p className="text-red-400 bg-red-900/30 p-3 rounded-md mb-6 text-sm shadow">{error}</p>}
         
-        {/* Check authUser (derived from session) for display conditions */}
-        {!authUser && !isLoadingProjects && !error && (
+        {!authUser && !isLoading && !error && (
             <p className="text-gray-400 text-center py-10">Please log in to see your projects.</p> 
         )}
 
-        {authUser && !isLoadingProjects && !error && projects.length === 0 && (
+        {authUser && !isLoading && !error && projects.length === 0 && (
           <div className="text-center py-10">
             <p className="text-gray-400 mb-4">You are not currently associated with any projects.</p>
             <p className="text-gray-500 text-sm">Click "Add New Project" to get started!</p>
@@ -780,7 +786,7 @@ export default function MyProjectsPage() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={projects.map(p => p.id)} strategy={verticalListSortingStrategy}>
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.map(project => (
                   <SortableProjectCard 
                     key={project.id} 

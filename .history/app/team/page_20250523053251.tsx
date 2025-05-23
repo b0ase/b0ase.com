@@ -380,14 +380,8 @@ export default function TeamPage() {
       if (updateError) throw updateError;
 
       setSuccessMessage('Project name updated successfully!');
-      
-      // Update the project name in the local state to preserve order
-      setManagedProjects(prevProjects => 
-        prevProjects.map(p => 
-          p.id === editingProjectId ? { ...p, name: currentEditingName.trim() } : p
-        )
-      );
-
+      // Refresh the project list to show the new name
+      await fetchManagedProjects(user.id);
       handleCancelEdit(); // Reset editing state
     } catch (e: any) {
       setError(`Failed to save project name: ${e.message}`);

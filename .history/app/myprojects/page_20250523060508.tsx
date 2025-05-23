@@ -36,7 +36,7 @@ enum ProjectRole {
 interface ClientProject {
   id: string; // This will now be the projects.id
   name: string;
-  project_slug?: string | null; // MADE OPTIONAL - From projects table - IF IT EXISTS
+  project_slug: string; // From projects table
   status: string | null; // From projects table (or clients if overridden)
   project_brief?: string | null; // From projects table
   badge1?: string | null; // From projects table (or clients if overridden)
@@ -194,7 +194,7 @@ function SortableProjectCard({
     isDragging 
   } = useSortable({ id: project.id });
 
-  const projectId = project.id;
+  const projectSlug = project.project_slug;
   const projectUrl = project.url;
 
   const style = {
@@ -221,8 +221,8 @@ function SortableProjectCard({
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
         <div className="flex items-center gap-x-3 flex-wrap">
-          {/* Project Name now always links to internal project page using project.id */}
-          <Link href={`/myprojects/${projectId}`} legacyBehavior>
+          {/* Project Name now always links to internal project page */}
+          <Link href={`/myprojects/${project.project_slug}`} legacyBehavior>
             <a className="text-xl font-semibold text-sky-400 hover:text-sky-300 hover:underline">
               {project.name}
             </a>
@@ -240,11 +240,9 @@ function SortableProjectCard({
               <FaEdit className="w-4 h-4" />
             </button>
           )}
-          {/* The existing general edit link remains, but will also use projectId if slug is absent */}
-          {/* We need to decide if this edit link should go to a page based on ID or if we need a slug later */}
-          {/* For now, let's assume /edit page also works with ID or we handle it there */} 
-          <Link href={`/myprojects/${projectId}/edit`} passHref legacyBehavior>
-            <a className="text-gray-400 hover:text-sky-400 transition-colors" title="Edit Project Details">
+          {/* The existing general edit link remains */}
+          <Link href={`/myprojects/${project.project_slug}/edit`} passHref legacyBehavior>
+            <a className="text-gray-400 hover:text-sky-400 transition-colors" title="Edit Project">
               <FaEdit className="w-4 h-4" />
             </a>
           </Link>
@@ -264,7 +262,7 @@ function SortableProjectCard({
 
       {/* Primary Action Buttons - Grouped separately for clarity */}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-4">
-        <Link href={`/myprojects/${projectId}`} legacyBehavior>
+        <Link href={`/myprojects/${projectSlug}`} legacyBehavior>
           <a 
             onClick={(e) => e.stopPropagation()}
             className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-700 text-sm font-medium shadow-sm text-gray-300 bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 focus:ring-offset-slate-900"
@@ -450,69 +448,91 @@ export default function MyProjectsPage() {
     if (!userId) {
       console.log("[MyProjectsPage] fetchProjects: No userId provided, setting projects to empty.");
       setProjects([]);
-      setIsLoadingProjects(false);
+      setIsLoadingProjects(false); // Projects loading finished (with no user ID)
       return;
     }
+    setError(null);
+    console.log("[MyProjectsPage] fetchProjects: Starting to fetch.");
 
-    console.log(`[MyProjectsPage] fetchProjects: Attempting to fetch projects for user ${userId} with restored fields (full function replacement, no project_slug).`);
     try {
-      const { data: projectsData, error: projectsError } = await supabase
-        .from('projects')
-        .select('id, name, owner_user_id, project_brief, status, badge2, badge3, badge4, badge5, created_at')
-        .eq('owner_user_id', userId);
+      const { data: allProjectsData, error: projectsError } = await supabase
+        .from('projects') 
+        .select(`
+          id,
+          name,
+          project_slug,
+          status,
+          project_brief,
+          badge1,
+          badge2,
+          badge3,
+          badge4,
+          badge5,
+          is_featured,
+          is_public,
+          owner_user_id,
+          created_at,
+          project_websites (url)
+        `);
 
-      console.log("[MyProjectsPage] fetchProjects: supabase.from('projects').select (no project_slug) result:", { projectsData, projectsError });
+      console.log("[MyProjectsPage] fetchProjects: supabase.from('projects').select result:", { allProjectsData, projectsError });
 
       if (projectsError) {
-        console.error("[MyProjectsPage] fetchProjects: Error fetching projects (restored fields):", projectsError);
-        setError(`Failed to load projects: ${projectsError.message}`);
+        console.error("[MyProjectsPage] fetchProjects: Error fetching projects:", projectsError);
+        setError('Failed to fetch projects.');
         setProjects([]);
-      } else if (projectsData) {
-        console.log("[MyProjectsPage] fetchProjects: Successfully fetched project data (restored fields):", projectsData);
-        
-        const transformedProjects: ClientProject[] = projectsData.map((p: any) => {
-          return {
-            id: p.id,
-            name: p.name,
-            status: p.status,
-            project_brief: p.project_brief,
-            badge1: p.status, // Use status for badge1
-            badge2: p.badge2,
-            badge3: p.badge3,
-            badge4: p.badge4,
-            badge5: p.badge5,
-            user_id: p.owner_user_id, // Critical for delete logic and role checks
-            created_at: p.created_at,
-            currentUserRole: p.owner_user_id === userId ? ProjectRole.Owner : undefined,
-            // Default/optional fields from ClientProject
-            description: p.project_brief, 
-            client_specific_status: null,
-            client_specific_badge1: null,
-            is_featured: false, 
-            is_public: false,
-            url: null, // Was from project_websites, keep null for now
-            logo_url: null,
-            primary_url: null,
-            project_type: null,
-            // owner_user_id is implicitly handled via user_id mapping for ClientProject purpose
-          };
-        });
-        
-        console.log("[MyProjectsPage] fetchProjects: Transformed projects (restored fields - full function):", transformedProjects);
-        setProjects(transformedProjects.sort((a, b) => getPriorityOrderValue(a.badge3 ?? null) - getPriorityOrderValue(b.badge3 ?? null) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
-        setError(null);
-      } else {
-        console.log("[MyProjectsPage] fetchProjects: No projects data and no error (restored fields).");
-        setProjects([]);
+        setIsLoadingProjects(false);
+        return;
       }
-    } catch (e: any) {
-      console.error("[MyProjectsPage] fetchProjects: Unexpected error during fetch (restored fields):", e);
-      setError(`An unexpected error occurred while fetching projects: ${e.message}`);
+
+      if (!allProjectsData) {
+        console.log("[MyProjectsPage] fetchProjects: No project data returned, setting projects to empty.");
+        setProjects([]);
+        setIsLoadingProjects(false); // Already handled in finally
+        return;
+      }
+
+      console.log(`[MyProjectsPage] fetchProjects: Fetched ${allProjectsData.length} raw projects. Starting processing.`);
+
+      const processedProjects = await Promise.all(allProjectsData.map(async (p: any) => {
+        let userRoleForProject: ProjectRole | string = '';
+        if (p.owner_user_id === userId) {
+          userRoleForProject = ProjectRole.Owner;
+        } else {
+          // console.log(`[MyProjectsPage] fetchProjects: Checking membership for project ${p.id}, user ${userId}`);
+          const { data: memberRole, error: memberError } = await supabase
+            .from('project_members')
+            .select('role')
+            .eq('project_id', p.id)
+            .eq('user_id', userId)
+            .single();
+          if (memberError && memberError.code !== 'PGRST116') { 
+            console.error(`[MyProjectsPage] fetchProjects: Error fetching role for user ${userId} in project ${p.id}:`, memberError);
+          } else if (memberRole) {
+            userRoleForProject = memberRole.role as ProjectRole | string;
+          }
+        }
+
+        const websiteData = p.project_websites?.[0];
+
+        return {
+          ...p,
+          url: websiteData?.url || null,
+          currentUserRole: userRoleForProject,
+        } as ClientProject;
+      }));
+
+      console.log("[MyProjectsPage] fetchProjects: Processing complete. Processed projects count:", processedProjects.length);
+      setProjects(processedProjects.sort((a, b) => getPriorityOrderValue(a.badge3 ?? null) - getPriorityOrderValue(b.badge3 ?? null) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    } catch (err) {
+      console.error('[MyProjectsPage] fetchProjects: Error in try-catch block:', err);
+      setError('An unexpected error occurred while fetching projects.');
       setProjects([]);
     } finally {
-      console.log("[MyProjectsPage] fetchProjects: fetch attempt finished (restored fields), setting isLoadingProjects to false.");
-      setIsLoadingProjects(false);
+      console.log("[MyProjectsPage] fetchProjects: Finally block reached. Setting setIsLoadingProjects to false.");
+      setIsLoadingProjects(false); // Projects loading finished
     }
+    setUpdatingItemId(null);
   }, [supabase]);
 
   useEffect(() => {
@@ -780,7 +800,7 @@ export default function MyProjectsPage() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={projects.map(p => p.id)} strategy={verticalListSortingStrategy}>
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.map(project => (
                   <SortableProjectCard 
                     key={project.id} 

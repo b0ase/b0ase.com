@@ -70,8 +70,6 @@ const getBadgeStyle = (_badgeValue: string | null): string => {
 interface ManagedProject { // For collapsible admin list
   id: string;
   name: string;
-  clientName?: string;
-  projectManagerName?: string;
 }
 
 interface TeamMember { // For members within an expanded managed project
@@ -92,11 +90,10 @@ interface SortableManagedProjectBarProps {
   selectedProjectId: string | null;
   onToggleExpand: (projectId: string) => void;
   user: User | null; // Current logged-in user
-  currentUserRole: string | null; // For edit permissions
   // Props for expanded content (member list and form)
   teamMembers: TeamMember[];
   isLoadingTeamMembers: boolean;
-  errorMembers: string | null;
+  errorMembers: string | null; // Assuming you have an error state for members section
   openRemoveConfirmModal: (member: TeamMember, projId: string, projName: string) => void;
   platformUsers: PlatformUser[];
   isLoadingPlatformUsers: boolean;
@@ -106,16 +103,9 @@ interface SortableManagedProjectBarProps {
   setNewMemberRole: (role: ProjectRole) => void;
   handleAddNewMember: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   isAddingMember: boolean;
-  isRemovingMember: boolean;
+  isRemovingMember: boolean; // To disable remove buttons during other operations
+  // Role fetching and styling helpers (can be passed or accessed via context if preferred)
   getProjectRoleStyle: (role: string | ProjectRole | undefined) => string;
-  // Inline editing props
-  editingProjectId: string | null;
-  currentEditingName: string;
-  isSavingProjectName: boolean;
-  onStartEdit: (projectId: string, currentName: string) => void;
-  onCancelEdit: () => void;
-  onSaveProjectName: () => Promise<void>;
-  onCurrentEditingNameChange: (name: string) => void;
 }
 
 function SortableManagedProjectBar({
@@ -123,7 +113,6 @@ function SortableManagedProjectBar({
   selectedProjectId,
   onToggleExpand,
   user,
-  currentUserRole,
   teamMembers,
   isLoadingTeamMembers,
   errorMembers,
@@ -137,14 +126,7 @@ function SortableManagedProjectBar({
   handleAddNewMember,
   isAddingMember,
   isRemovingMember,
-  getProjectRoleStyle,
-  editingProjectId,
-  currentEditingName,
-  isSavingProjectName,
-  onStartEdit,
-  onCancelEdit,
-  onSaveProjectName,
-  onCurrentEditingNameChange
+  getProjectRoleStyle
 }: SortableManagedProjectBarProps) {
   const { 
     attributes,
@@ -168,87 +150,27 @@ function SortableManagedProjectBar({
   return (
     <div ref={setNodeRef} style={style} className="rounded-lg overflow-hidden shadow-md border border-gray-700 hover:border-gray-600 transition-colors duration-150 bg-black">
       <div className="w-full flex items-center justify-between p-4 focus:outline-none">
-        <div className="flex items-center flex-grow min-w-0 mr-4">
+        <div className="flex items-center flex-grow">
           <button 
             {...attributes} 
             {...listeners} 
             onClick={(e) => e.stopPropagation()}
-            className="p-2 mr-3 text-gray-500 hover:text-gray-300 cursor-grab active:cursor-grabbing focus:outline-none focus:ring-2 focus:ring-sky-500 rounded"
+            className="p-2 mr-2 text-gray-500 hover:text-gray-300 cursor-grab active:cursor-grabbing focus:outline-none focus:ring-2 focus:ring-sky-500 rounded"
           >
             <FaGripVertical />
           </button>
-          <FaFolderOpen className="mr-3 text-sky-500 text-lg flex-shrink-0" /> 
-          <span 
-            className="font-medium text-lg text-gray-100 truncate cursor-pointer hover:text-sky-400 transition-colors"
-            onClick={() => onToggleExpand(mp.id)}
-            title={mp.name}
-          >
-            {mp.name}
-          </span>
-          {currentUserRole === 'Admin' && editingProjectId !== mp.id && (
-            <button 
-              onClick={(e) => { e.stopPropagation(); onStartEdit(mp.id, mp.name); }}
-              className="ml-2 p-1.5 text-gray-400 hover:text-sky-400 transition-colors rounded focus:outline-none focus:ring-1 focus:ring-sky-500"
-              title="Edit project name"
-            >
-              <FaEdit />
-            </button>
-          )}
+          <FaFolderOpen className="mr-3 text-sky-500 text-lg" /> 
+          <span className="font-medium text-lg text-gray-100 mr-auto truncate cursor-pointer" onClick={() => onToggleExpand(mp.id)}>{mp.name}</span>
         </div>
-
-        {/* Edit mode UI for project name */}
-        {editingProjectId === mp.id && currentUserRole === 'Admin' && (
-          <div className="flex items-center flex-grow ml-2 mr-2"> {/* Takes up project name space */}
-            <input 
-              type="text" 
-              value={currentEditingName}
-              onChange={(e) => onCurrentEditingNameChange(e.target.value)}
-              className="flex-grow bg-gray-700 text-white border border-sky-500 rounded-md px-2 py-1 text-lg focus:ring-1 focus:ring-sky-400 focus:border-sky-400"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') onSaveProjectName();
-                if (e.key === 'Escape') onCancelEdit();
-              }}
-            />
-            <button 
-              onClick={(e) => { e.stopPropagation(); onSaveProjectName(); }}
-              disabled={isSavingProjectName || !currentEditingName.trim() || currentEditingName.trim().length < 3}
-              className="ml-2 px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white text-sm rounded-md disabled:opacity-60 flex items-center"
-            >
-              {isSavingProjectName ? <FaSpinner className="animate-spin mr-1.5" /> : <FaEdit className="mr-1.5" />} Save
-            </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); onCancelEdit(); }}
-              disabled={isSavingProjectName}
-              className="ml-2 px-3 py-1.5 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded-md disabled:opacity-60"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-
-        {/* Middle: Client and PM info - only show if NOT editing project name */}
-        {editingProjectId !== mp.id && (
-          <div className="flex items-center space-x-4 flex-shrink-0 mx-4">
-            <div className="flex flex-col items-start min-w-[120px]">
-              <span className="text-xs text-gray-500">Client</span>
-              <span className="text-sm text-gray-200 truncate" title={mp.clientName || 'N/A'}>{mp.clientName || '---'}</span>
-            </div>
-            <div className="flex flex-col items-start min-w-[120px]">
-              <span className="text-xs text-gray-500">Project Manager</span>
-              <span className="text-sm text-gray-200 truncate" title={mp.projectManagerName || 'N/A'}>{mp.projectManagerName || '---'}</span>
-            </div>
-          </div>
-        )}
-        <div className="flex items-center flex-shrink-0 ml-auto">
+        <div className="flex items-center flex-shrink-0 ml-2">
           <span 
             onClick={() => onToggleExpand(mp.id)}
-            className={`mr-3 text-xs font-semibold px-2.5 py-1 rounded-full cursor-pointer transition-all ${isExpanded ? 'bg-sky-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+            className={`mr-3 text-xs font-semibold px-2 py-0.5 rounded-full cursor-pointer ${isExpanded ? 'bg-sky-600 text-white' : 'bg-gray-700 text-gray-300'}`}
           >
             {isExpanded ? 'MANAGING' : 'VIEW MEMBERS'}
           </span>
-          <button onClick={() => onToggleExpand(mp.id)} className="p-1.5 rounded hover:bg-gray-700 transition-colors">
-            {isExpanded ? <FaChevronUp className="text-gray-300" /> : <FaChevronDown className="text-gray-300" />}
+          <button onClick={() => onToggleExpand(mp.id)} className="p-1">
+            {isExpanded ? <FaChevronUp className="text-gray-400" /> : <FaChevronDown className="text-gray-400" />}
           </button>
         </div>
       </div>
@@ -339,12 +261,6 @@ export default function TeamPage() {
   const [errorMembers, setErrorMembers] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // State for inline project name editing
-  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
-  const [currentEditingName, setCurrentEditingName] = useState<string>('');
-  const [isSavingProjectName, setIsSavingProjectName] = useState<boolean>(false);
-
   // DND Kit sensors setup
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -352,52 +268,6 @@ export default function TeamPage() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-
-  // --- BEGIN Inline Project Name Edit Handlers ---
-  const handleStartEdit = (projectId: string, currentName: string) => {
-    setEditingProjectId(projectId);
-    setCurrentEditingName(currentName);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingProjectId(null);
-    setCurrentEditingName('');
-  };
-
-  const handleSaveProjectName = async () => {
-    if (!editingProjectId || !currentEditingName.trim() || !user) return;
-    if (currentEditingName.trim().length < 3) {
-        setError("Project name must be at least 3 characters.");
-        return;
-    }
-    setIsSavingProjectName(true); setError(null); setSuccessMessage(null);
-    try {
-      const { error: updateError } = await supabase
-        .from('projects')
-        .update({ name: currentEditingName.trim() })
-        .eq('id', editingProjectId);
-
-      if (updateError) throw updateError;
-
-      setSuccessMessage('Project name updated successfully!');
-      
-      // Update the project name in the local state to preserve order
-      setManagedProjects(prevProjects => 
-        prevProjects.map(p => 
-          p.id === editingProjectId ? { ...p, name: currentEditingName.trim() } : p
-        )
-      );
-
-      handleCancelEdit(); // Reset editing state
-    } catch (e: any) {
-      setError(`Failed to save project name: ${e.message}`);
-      // Optionally, keep editing state active on error or reset as preferred
-      // handleCancelEdit(); 
-    } finally {
-      setIsSavingProjectName(false);
-    }
-  };
-  // --- END Inline Project Name Edit Handlers ---
 
   // DND Kit onDragEnd handler
   const handleDragEnd = (event: DragEndEvent) => {
@@ -414,30 +284,14 @@ export default function TeamPage() {
   };
 
   useEffect(() => {
-    const getUserAndRole = async () => {
+    const getUser = async () => {
       setLoadingUser(true);
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        // Fetch profile role here
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-        if (profileError) {
-          console.error("Error fetching user role:", profileError);
-          setError("Could not load user role. Please refresh."); // Inform user
-          setCurrentUserRole(null); // Ensure role is null on error
-        } else {
-          setCurrentUserRole(profile?.role || null);
-        }
-      } else {
-        router.push('/login?redirectedFrom=/team');
-      }
+      if (session?.user) setUser(session.user);
+      else router.push('/login?redirectedFrom=/team');
       setLoadingUser(false);
     };
-    getUserAndRole();
+    getUser();
   }, [supabase, router]);
 
   const fetchManagedProjects = useCallback(async (userId: string) => {
@@ -445,15 +299,16 @@ export default function TeamPage() {
     setIsLoadingProjects(true); setError(null);
     try {
       const { data: profile, error: profileError } = await supabase.from('profiles').select('role').eq('id', userId).single();
-      if (profileError && profileError.code !== 'PGRST116') throw profileError;
+      if (profileError && profileError.code !== 'PGRST116') throw profileError; // Allow no profile (though unlikely for logged-in user)
 
-      let rawProjects: { id: string; name: string; }[] = [];
+      let finalProjects: ManagedProject[] = [];
 
       if (profile?.role === 'Admin') {
         const { data, error: e } = await supabase.from('projects').select('id, name');
         if (e) throw e;
-        rawProjects = data || [];
+        finalProjects = data || [];
       } else {
+        // 1. Projects owned by the user
         const { data: ownedProjects, error: ownedError } = await supabase
           .from('projects')
           .select('id, name')
@@ -462,14 +317,16 @@ export default function TeamPage() {
         
         const ownedProjectList = ownedProjects || [];
 
+        // 2. Projects where the user is a 'Client'
         const { data: clientProjectMemberships, error: clientMembershipError } = await supabase
           .from('project_members')
           .select('project_id')
           .eq('user_id', userId)
-          .eq('role', 'Client');
+          .eq('role', 'Client'); // Ensure this matches the DB enum value
+
         if (clientMembershipError) throw clientMembershipError;
 
-        let clientRoleProjects: { id: string; name: string; }[] = [];
+        let clientRoleProjects: ManagedProject[] = [];
         if (clientProjectMemberships && clientProjectMemberships.length > 0) {
           const clientProjectIds = clientProjectMemberships.map(pm => pm.project_id);
           const { data: projectsForClientRole, error: projectsForClientError } = await supabase
@@ -480,9 +337,10 @@ export default function TeamPage() {
           clientRoleProjects = projectsForClientRole || [];
         }
         
+        // Combine and deduplicate
         const allManagedProjects = [...ownedProjectList, ...clientRoleProjects];
         const uniqueProjectIds = new Set<string>();
-        rawProjects = allManagedProjects.filter(project => {
+        finalProjects = allManagedProjects.filter(project => {
           if (!uniqueProjectIds.has(project.id)) {
             uniqueProjectIds.add(project.id);
             return true;
@@ -490,37 +348,6 @@ export default function TeamPage() {
           return false;
         });
       }
-
-      // Enhance projects with Client and PM names
-      const finalProjects = await Promise.all(rawProjects.map(async (proj) => {
-        let clientName: string | undefined = undefined;
-        let projectManagerName: string | undefined = undefined;
-
-        const { data: members, error: membersError } = await supabase
-          .from('project_members')
-          .select('user_id, role')
-          .eq('project_id', proj.id)
-          .in('role', ['Client', 'project_manager']); // Fetch both roles
-
-        if (membersError) {
-          console.error(`Error fetching members for project ${proj.id}:`, membersError);
-          // Continue without these names if there's an error
-        } else if (members) {
-          const clientMember = members.find(m => m.role === 'Client');
-          const pmMember = members.find(m => m.role === 'project_manager');
-
-          if (clientMember) {
-            const { data: profileData } = await supabase.from('profiles').select('display_name, username').eq('id', clientMember.user_id).single();
-            clientName = profileData?.display_name || profileData?.username;
-          }
-          if (pmMember) {
-            const { data: profileData } = await supabase.from('profiles').select('display_name, username').eq('id', pmMember.user_id).single();
-            projectManagerName = profileData?.display_name || profileData?.username;
-          }
-        }
-        return { ...proj, clientName, projectManagerName };
-      }));
-
       setManagedProjects(finalProjects);
     } catch (e: any) { setError('Failed to load managed projects: ' + e.message); setManagedProjects([]); }
     finally { setIsLoadingProjects(false); }
@@ -671,28 +498,20 @@ export default function TeamPage() {
                       selectedProjectId={selectedProjectId}
                       onToggleExpand={() => setSelectedProjectId(prev => prev === mp.id ? null : mp.id)}
                       user={user}
-                      currentUserRole={currentUserRole}
-                      teamMembers={teamMembers.filter(tm => tm.project_id === mp.id)}
-                      isLoadingTeamMembers={isLoadingTeamMembers && selectedProjectId === mp.id}
-                      errorMembers={selectedProjectId === mp.id ? errorMembers : null}
+                      teamMembers={teamMembers.filter(tm => tm.project_id === mp.id)} // Pass filtered members for THIS project
+                      isLoadingTeamMembers={isLoadingTeamMembers && selectedProjectId === mp.id} // Only loading if this project is selected
+                      errorMembers={selectedProjectId === mp.id ? errorMembers : null} // Pass error only if this project is selected
                       openRemoveConfirmModal={openRemoveConfirmModal}
                       platformUsers={platformUsers}
                       isLoadingPlatformUsers={isLoadingPlatformUsers}
-                      selectedPlatformUserId={selectedPlatformUserId}
+                      selectedPlatformUserId={selectedPlatformUserId} // These form states are shared for the currently selected project
                       setSelectedPlatformUserId={setSelectedPlatformUserId}
                       newMemberRole={newMemberRole}
                       setNewMemberRole={setNewMemberRole}
                       handleAddNewMember={handleAddNewMember}
                       isAddingMember={isAddingMember && selectedProjectId === mp.id}
-                      isRemovingMember={isRemovingMember && selectedProjectId === mp.id}
-                      getProjectRoleStyle={getProjectRoleStyle}
-                      editingProjectId={editingProjectId}
-                      currentEditingName={currentEditingName}
-                      isSavingProjectName={isSavingProjectName}
-                      onStartEdit={handleStartEdit}
-                      onCancelEdit={handleCancelEdit}
-                      onSaveProjectName={handleSaveProjectName}
-                      onCurrentEditingNameChange={setCurrentEditingName}
+                      isRemovingMember={isRemovingMember && selectedProjectId === mp.id} // Pass relevant states
+                      getProjectRoleStyle={getProjectRoleStyle} // Pass helper
                     />
                   ))}
                 </div>
