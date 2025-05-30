@@ -212,7 +212,7 @@ function SortableProjectCard({
       {updatingItemId === project.id && (
         <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg z-[101]">
           <FaSpinner className="animate-spin text-sky-500 text-3xl" />
-        </div>
+              </div>
       )}
 
       {/* Header Section */}
@@ -227,8 +227,8 @@ function SortableProjectCard({
           <Link href={`/myprojects/${project.project_slug}/edit`} passHref legacyBehavior>
             <a className="text-gray-400 hover:text-sky-400 transition-colors" title="Edit Project">
               <FaEdit className="w-4 h-4" />
-            </a>
-          </Link>
+              </a>
+            </Link>
           {project.currentUserRole && (
             <span className={getProjectRoleStyle(project.currentUserRole)}>
               {/* Display Logic: Convert enum values to readable text */}
@@ -289,7 +289,7 @@ function SortableProjectCard({
         >
             <FaComments className="mr-1.5 h-4 w-4" /> Open Team Chat
         </button>
-      </div>
+          </div>
 
       {/* Badges/Controls Section */}
       <div className="mb-4 space-y-2 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
@@ -305,7 +305,7 @@ function SortableProjectCard({
           >
             {badge1Options.map(opt => <option key={opt} value={opt} className="bg-gray-800 text-gray-300">{opt}</option>)}
           </select>
-        </div>
+          </div>
         <div className="flex-shrink-0">
           <label htmlFor={`badge2-${project.id}`} className="sr-only">Badge 2</label>
           <select 
@@ -319,7 +319,7 @@ function SortableProjectCard({
             <option value="">Badge 2...</option>
             {badge2Options.map(opt => <option key={opt} value={opt} className="bg-gray-800 text-gray-300">{opt}</option>)}
           </select>
-        </div>
+          </div>
         <div className="flex-shrink-0">
           <label htmlFor={`badge3-${project.id}`} className="sr-only">Badge 3</label>
           <select 
@@ -333,7 +333,7 @@ function SortableProjectCard({
             <option value="">Badge 3...</option>
             {badge3Options.map(opt => <option key={opt} value={opt} className="bg-gray-800 text-gray-300">{opt}</option>)}
           </select>
-        </div>
+          </div>
         <div className="flex-shrink-0">
           <label htmlFor={`badge4-${project.id}`} className="sr-only">Badge 4</label>
           <select 
@@ -361,8 +361,8 @@ function SortableProjectCard({
             <option value="">Badge 5...</option>
             {badge2Options.map(opt => <option key={opt} value={opt} className="bg-gray-800 text-gray-300">{opt}</option>)}
           </select>
-        </div>
-      </div>
+            </div>
+          </div>
 
       {/* Footer/Description Section */}
       {project.project_brief ? (
@@ -386,9 +386,9 @@ function SortableProjectCard({
           >
               <FaTrash className="mr-1 h-3 w-3" /> Delete
           </button>
-        </div>
+                    </div>
       )}
-    </div>
+                  </div>
   );
 }
 
@@ -635,7 +635,7 @@ export default function MyProjectsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-950 via-black to-gray-950 text-gray-300 flex flex-col items-center justify-center">
         <p className="text-xl">Loading projects...</p>
-      </div>
+                  </div>
     );
   }
 

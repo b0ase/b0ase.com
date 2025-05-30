@@ -19,8 +19,8 @@ export default function SubNavigation() {
   return (
     // Hidden on mobile (e.g., hidden md:flex), shown on desktop
     // Adjust sticky top value based on Header height
-    <nav className="hidden md:flex sticky top-[60px] z-30 w-full bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 shadow-sm px-4">
-      <div className="w-full flex justify-between items-center h-12 space-x-6">
+    <nav className="hidden md:flex sticky top-[60px] z-30 w-full bg-background border-b border-border shadow-sm px-4">
+      <div className="w-full flex justify-between items-center h-12 space-x-6 text-foreground">
         {/* Left group: Service links */}
         {/* Right group: Service links */}
         <ul className="flex space-x-4 md:space-x-6">
@@ -28,7 +28,7 @@ export default function SubNavigation() {
             <li key={section.name}>
               <Link
                 href={section.href}
-                className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 {section.name}
               </Link>
