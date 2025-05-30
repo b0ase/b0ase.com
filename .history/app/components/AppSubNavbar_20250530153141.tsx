@@ -64,9 +64,9 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, user }: Ap
   // Determine which links to display based on the expanded state and screen size
   const displayedLinks = isExpanded ? navLinks : navLinks; // Always show all links
   const linkContainerClasses = isExpanded 
-    ? (isDesktop ? 'flex flex-row items-center gap-2 p-2 justify-center' : 'grid grid-cols-2 gap-2 p-2') // Row for desktop expanded, Grid for mobile expanded
+    ? 'flex flex-wrap items-center gap-2 p-2 justify-start' // Changed to match collapsed desktop view
     : (isDesktop 
-      ? 'flex flex-row items-center gap-2 p-2 justify-center' // Row for desktop non-expanded
+      ? 'flex flex-wrap items-center gap-2 p-2 justify-center' // Change justify-start to justify-center for non-expanded desktop
       : 'hidden');
 
   return (
@@ -126,7 +126,7 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, user }: Ap
           <div className={`flex-grow ${linkContainerClasses}`}>
             {displayedLinks.map((link, index) => {
               const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.href !== '/');
-              const buttonBaseClasses = `px-2.5 py-2.5 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out border w-full md:w-auto`; // Added md:w-auto to prevent full width on desktop
+              const buttonBaseClasses = `px-2.5 py-2.5 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out border`;
               const activeClasses = 'bg-gray-800 text-white border-gray-600 shadow-md';
               const inactiveClasses = 'bg-black hover:bg-gray-900 text-gray-300 border-gray-700 hover:border-gray-500';
 
@@ -136,10 +136,10 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, user }: Ap
               }
               
               // Special styling for "Start a New Project" in expanded mobile view
-              // const isFirstButton = link.label === 'Start a Project'; // Commented out or removed
-              // const colSpanClass = isExpanded && isFirstButton && !isDesktop
-              //   ? 'col-span-full mb-2' // Make the first button full width on mobile
-              //   : '';
+              const isFirstButton = link.label === 'Start a Project';
+              const colSpanClass = isExpanded && isFirstButton && !isDesktop
+                ? 'col-span-full mb-2' // Make the first button full width on mobile
+                : '';
               
               let layoutClasses = '';
               if (isExpanded) {
@@ -154,7 +154,7 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, user }: Ap
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`${buttonBaseClasses} ${isActive ? activeClasses : inactiveClasses} ${layoutClasses}`}
+                  className={`${buttonBaseClasses} ${isActive ? activeClasses : inactiveClasses} ${layoutClasses} ${colSpanClass}`}
                   onClick={handleLinkClick}
                 >
                   <link.icon className={`h-4 w-4 mr-3 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-200 transition-colors'}`} />

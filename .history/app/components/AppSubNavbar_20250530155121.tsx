@@ -126,7 +126,7 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, user }: Ap
           <div className={`flex-grow ${linkContainerClasses}`}>
             {displayedLinks.map((link, index) => {
               const isActive = pathname === link.href || (pathname.startsWith(link.href) && link.href !== '/');
-              const buttonBaseClasses = `px-2.5 py-2.5 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out border w-full md:w-auto`; // Added md:w-auto to prevent full width on desktop
+              const buttonBaseClasses = `px-2.5 py-2.5 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out border w-full`; // Added w-full for grid items
               const activeClasses = 'bg-gray-800 text-white border-gray-600 shadow-md';
               const inactiveClasses = 'bg-black hover:bg-gray-900 text-gray-300 border-gray-700 hover:border-gray-500';
 
