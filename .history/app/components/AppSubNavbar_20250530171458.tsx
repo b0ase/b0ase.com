@@ -64,9 +64,9 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, user }: Ap
   // Determine which links to display based on the expanded state and screen size
   const displayedLinks = isExpanded ? navLinks : navLinks; // Always show all links
   const linkContainerClasses = isExpanded 
-    ? 'flex flex-wrap items-center gap-2 p-2 justify-center' // Changed justify-end to justify-center for expanded desktop
+    ? 'flex flex-wrap items-center gap-2 p-2 justify-end' // Changed justify-start to justify-end for expanded desktop
     : (isDesktop 
-      ? 'flex flex-wrap items-center gap-2 p-2 justify-center' // Changed justify-end to justify-center for collapsed desktop
+      ? 'flex flex-wrap items-center gap-2 p-2 justify-end' // Changed justify-start to justify-end for collapsed desktop
       : 'hidden');
 
   return (
