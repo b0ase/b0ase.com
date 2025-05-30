@@ -139,8 +139,8 @@ export default function AppSubNavbar({ initialIsExpanded, onCollapse, user }: Ap
               
               // Special styling for "Start a New Project" in expanded mobile view
               const isFirstButton = link.label === 'Start a Project';
-              const colSpanClass = !isDesktop && isFirstButton && isExpanded
-                ? '' // Removed col-span-full for expanded mobile
+              const colSpanClass = isExpanded && isFirstButton && !isDesktop
+                ? 'col-span-full mb-2' // Make the first button full width on mobile
                 : '';
               
               let layoutClasses = '';
