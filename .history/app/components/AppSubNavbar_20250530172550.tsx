@@ -16,7 +16,7 @@ const navLinks = [
 ];
 
 const welcomeTitle = "Ready to build something amazing?";
-const welcomeSubtitle = "Welcome to b0ase.com! This is your hub to bring your digital ideas to life. Start a new project to define your vision, outline features, and begin collaborating with our team. Whether it's a website, a mobile app, an AI solution, or something entirely new, we're here to help you build it."; // Added a comment
+const welcomeSubtitle = "Welcome to b0ase.com! This is your hub to bring your digital ideas to life. Start a new project to define your vision, outline features, and begin collaborating with our team. Whether it's a website, a mobile app, an AI solution, or something entirely new, we're here to help you build it.";
 
 interface AppSubNavbarProps {
   initialIsExpanded: boolean;

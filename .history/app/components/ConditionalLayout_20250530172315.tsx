@@ -53,27 +53,6 @@ const minimalLayoutPathPrefixes = [
 ];
 // --- END NEW ---
 
-// App-specific pages that require auth and should have the sidebar
-const appPathPrefixes = [
-  '/profile',
-  '/skills', // Added '/skills' here
-  '/myprojects',
-  '/projects/new',
-  '/projects/join',
-  '/myagents',
-  '/mytoken',
-  '/careers',
-  '/teammanagement',
-  '/team', // also covers /teams typically if checking start
-  '/teams', 
-  '/messages',
-  '/diary',
-  '/workinprogress',
-  '/gigs',
-  '/finances',
-  '/settings'
-];
-
 // Note: The session prop passed to ConditionalLayout from RootLayout is the server-side session.
 // We will now primarily rely on the client-side session from useAuth for dynamic updates.
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
@@ -94,6 +73,26 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   const [isClientSideLogoutActive, setIsClientSideLogoutActive] = useState(false);
   const [isMounted, setIsMounted] = useState(false); // New state for mounted check
 
+  // App-specific pages that require auth and should have the sidebar
+  const appPathPrefixes = [
+    '/profile',
+    '/skills', // Added '/skills' here
+    '/myprojects',
+    '/projects/new',
+    '/projects/join',
+    '/myagents',
+    '/mytoken',
+    '/careers',
+    '/teammanagement',
+    '/team', // also covers /teams typically if checking start
+    '/teams', 
+    '/messages',
+    '/diary',
+    '/workinprogress',
+    '/gigs',
+    '/finances',
+    '/settings'
+  ];
   const isAppPage = appPathPrefixes.some(prefix => pathname.startsWith(prefix));
 
   // AuthCheckEffect - MOVED UP
@@ -252,9 +251,7 @@ const AuthenticatedAppLayout = ({ children, isParentFullScreenMenuOpen, setIsPar
     window.location.assign('/'); 
   };
 
-  // const shouldAppSubNavbarBeExpanded = pathname === '/profile'; // Old logic
-  // Set to false for all app pages, true otherwise (like landing page which isn't in AppLayout)
-  const shouldAppSubNavbarBeExpanded = !appPathPrefixes.some(prefix => pathname.startsWith(prefix));
+  const shouldAppSubNavbarBeExpanded = pathname === '/profile';
 
   // Refined loading state: wait for profile and user info if profileLoading is true
   if (profileLoading && (!profile || !user)) { 
@@ -266,8 +263,8 @@ const AuthenticatedAppLayout = ({ children, isParentFullScreenMenuOpen, setIsPar
     );
   }
   
-  const appPathPrefixesForSidebar = [
-    '/profile', '/skills', '/myprojects', '/projects/new', '/projects/join', '/myagents', 
+  const appPathPrefixesForSidebar = [ 
+    '/profile', '/myprojects', '/projects/new', '/projects/join', '/myagents', 
     '/mytoken', '/careers', '/teammanagement', '/team', '/teams', 
     '/messages', '/diary', '/workinprogress', '/gigs', '/finances', '/settings'
   ];

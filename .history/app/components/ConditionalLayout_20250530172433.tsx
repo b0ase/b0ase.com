@@ -266,8 +266,8 @@ const AuthenticatedAppLayout = ({ children, isParentFullScreenMenuOpen, setIsPar
     );
   }
   
-  const appPathPrefixesForSidebar = [
-    '/profile', '/skills', '/myprojects', '/projects/new', '/projects/join', '/myagents', 
+  const appPathPrefixesForSidebar = [ 
+    '/profile', '/myprojects', '/projects/new', '/projects/join', '/myagents', 
     '/mytoken', '/careers', '/teammanagement', '/team', '/teams', 
     '/messages', '/diary', '/workinprogress', '/gigs', '/finances', '/settings'
   ];
