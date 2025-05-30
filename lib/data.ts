@@ -139,6 +139,36 @@ export const portfolioData: PortfolioData = {
       githubUrl: 'https://github.com/b0ase/robust-ae'
     },
     // Domain Projects
+    { 
+      id: 22, // New unique ID
+      title: 'BitDNS.website', 
+      slug: 'bitdns-website', 
+      description: '[Description for BitDNS.website]', // TODO: Add description
+      type: 'client' as const, // Set type to client
+      status: 'active', // Or appropriate status
+      liveUrl: 'https://bitdns.website', 
+      tech: [], // TODO: Add tech stack
+      cardImageUrls: [], // TODO: Add image URLs
+      subtitle: '[Subtitle for BitDNS.website]', // Optional subtitle
+      xUrl: '#', // TODO: Add X URL if available
+      notionUrl: '#', // TODO: Add Notion URL if available
+      githubUrl: '#' // TODO: Add GitHub URL if available
+    },
+    { 
+      id: 23, // New unique ID
+      title: 'BitCDN.website', 
+      slug: 'bitcdn-website', 
+      description: '[Description for BitCDN.website]', // TODO: Add description
+      type: 'client' as const, // Set type to client
+      status: 'active', // Or appropriate status
+      liveUrl: 'https://bitcdn.website', 
+      tech: [], // TODO: Add tech stack
+      cardImageUrls: [], // TODO: Add image URLs
+      subtitle: '[Subtitle for BitCDN.website]', // Optional subtitle
+      xUrl: '#', // TODO: Add X URL if available
+      notionUrl: '#', // TODO: Add Notion URL if available
+      githubUrl: '#' // TODO: Add GitHub URL if available
+    },
     { ...createProjectStub(7, 'ninjapunkgirls.com', 'A vibrant NFT marketplace showcasing unique digital art of cyberpunk female warriors.', 'Ltd Company', [], '$NPG', 85, [
       '/images/clientprojects/ninjapunkgirls/slug/NPG%20logo.png'
     ]), type: 'domain' as const },
