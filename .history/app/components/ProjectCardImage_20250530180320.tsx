@@ -25,8 +25,7 @@ const ProjectCardImage: React.FC<ProjectCardImageProps> = ({
     <Image
       src={imageUrl}
       alt={alt}
-      fill={true}
-      className="rounded-full object-cover"
+      className="w-full h-full rounded-full object-cover"
       priority
     />
   );

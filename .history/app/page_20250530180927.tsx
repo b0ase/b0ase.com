@@ -292,7 +292,7 @@ export default function PortfolioPage() {
                     </div>
 
                     {/* Main image/avatar area - this is the small circular logo */}
-                    <div className="absolute top-3 left-3 z-20 w-20 h-20 flex items-start justify-start">
+                    <div className="absolute top-4 left-4 z-20 w-20 h-20 flex items-center justify-center">
                       {primaryImageUrl && (
                         <ProjectCardImage 
                           imageUrls={project.cardImageUrls!}
@@ -302,7 +302,7 @@ export default function PortfolioPage() {
                     </div>
 
                     {/* Text content area */}
-                    <div className="flex flex-col flex-grow mt-16">
+                    <div className="flex flex-col flex-grow mt-24">
                       <h3 className="text-lg font-semibold text-black dark:text-white mb-1">
                         <a 
                           href={project.liveUrl || '#'} 

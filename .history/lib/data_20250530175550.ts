@@ -138,54 +138,36 @@ export const portfolioData: PortfolioData = {
       notionUrl: '#',
       githubUrl: 'https://github.com/b0ase/robust-ae'
     },
-    // Marina3D.xyz - Moved to top row
-    {
-      // Using createProjectStub for consistency, then overriding/adding specific fields
-      id: 21, // New unique ID
-      title: 'Marina3D.xyz', // Title
-      slug: 'marina3d-xyz', // Slug
-      description: 'Cutting-edge 3D visualization and interactive experiences for the web.', // Description
-      status: 'Live', // Status
-      tech: ['Next.js', 'TypeScript', 'Three.js', 'WebGL'], // Example Tech Stack (customize as needed)
-      tokenName: '$MARS', // Added tokenName
-      tokenProgressPercent: 0, // tokenProgressPercent (0 if not applicable)
-      cardImageUrls: ['/images/clientprojects/marina3d-xyz/slug/mar3D_logo.png'], // Updated image path
-      type: 'client' as const, // Ensure it's treated as a domain project (changed from domain to client to match others in this section)
-      liveUrl: 'https://marina3d.xyz', // Specific live URL
-      subtitle: 'Interactive 3D Web Experiences' // Example subtitle
-    },
     // Domain Projects
     { 
       id: 22, // New unique ID
-      title: 'BitDNS', 
+      title: 'BitDNS.website', 
       slug: 'bitdns-website', 
-      description: 'A blockchain project focused on tokenizing DNS records to provide a decentralized domain name system.',
+      description: '[Description for BitDNS.website]', // TODO: Add description
       type: 'client' as const, // Set type to client
       status: 'active', // Or appropriate status
       liveUrl: 'https://bitdns.website', 
       tech: [], // TODO: Add tech stack
-      cardImageUrls: ['/images/clientprojects/bitdns-website/bitdns-logo.svg'], // TODO: Add image URLs
+      cardImageUrls: [], // TODO: Add image URLs
       subtitle: '[Subtitle for BitDNS.website]', // Optional subtitle
       xUrl: '#', // TODO: Add X URL if available
       notionUrl: '#', // TODO: Add Notion URL if available
-      githubUrl: '#', // TODO: Add GitHub URL if available
-      tokenName: '$DNS' // Added token name
+      githubUrl: '#' // TODO: Add GitHub URL if available
     },
     { 
       id: 23, // New unique ID
-      title: 'BitCDN', 
+      title: 'BitCDN.website', 
       slug: 'bitcdn-website', 
-      description: 'Providing pay-to-stream services by combining aspects of decentralized file sharing with Bitcoin payments.',
+      description: '[Description for BitCDN.website]', // TODO: Add description
       type: 'client' as const, // Set type to client
       status: 'active', // Or appropriate status
       liveUrl: 'https://bitcdn.website', 
       tech: [], // TODO: Add tech stack
-      cardImageUrls: ['/images/clientprojects/bitcdn-website/bitcdn-logo.svg'], // TODO: Add image URLs
+      cardImageUrls: [], // TODO: Add image URLs
       subtitle: '[Subtitle for BitCDN.website]', // Optional subtitle
       xUrl: '#', // TODO: Add X URL if available
       notionUrl: '#', // TODO: Add Notion URL if available
-      githubUrl: '#', // TODO: Add GitHub URL if available
-      tokenName: '$CDN' // Added token name
+      githubUrl: '#' // TODO: Add GitHub URL if available
     },
     { ...createProjectStub(7, 'ninjapunkgirls.com', 'A vibrant NFT marketplace showcasing unique digital art of cyberpunk female warriors.', 'Ltd Company', [], '$NPG', 85, [
       '/images/clientprojects/ninjapunkgirls/slug/NPG%20logo.png'
@@ -207,12 +189,28 @@ export const portfolioData: PortfolioData = {
       type: 'domain' as const 
     },
     { ...createProjectStub(12, 'metagraph.app', 'Innovative data visualization tool that transforms complex relationships into interactive 3D networks.', 'App', [], '$META', 100, []), type: 'domain' as const },
-    { ...createProjectStub(13, 'floop.online', 'Real-time collaborative workspace for creative professionals with integrated project management.', 'Platform', [], '$FLOOP', 100, ['/images/clientprojects/floop.online/floop-logo.png']), type: 'domain' as const },
+    { ...createProjectStub(13, 'floop.online', 'Real-time collaborative workspace for creative professionals with integrated project management.', 'Platform', [], '$FLOOP', 100, []), type: 'domain' as const },
     { ...createProjectStub(14, 'dns-dex.com', 'Decentralized domain name exchange platform revolutionizing how web addresses are traded.', 'Platform', [], '$DNSD', 100, []), type: 'domain' as const },
     { ...createProjectStub(15, 'tribeswallet.com', 'Secure multi-chain cryptocurrency wallet designed for community-driven token ecosystems.', 'App', [], '$TWALL', 100, []), type: 'domain' as const },
     { ...createProjectStub(16, 'pennypics.store', 'Micro-payment based image marketplace where photographers earn per view.', 'E-commerce', [], '$PICS', 100, []), type: 'domain' as const },
     { ...createProjectStub(17, 'missvoid.store', 'Avant-garde fashion boutique featuring cyberpunk and dystopian-inspired clothing.', 'E-commerce', [], '$VOID', 100, ['/images/clientprojects/missvoid.store/slug/missvoid_logo.png']), type: 'domain' as const },
     { ...createProjectStub(18, 'interiordesigns.website', 'Virtual interior design consultation platform with AI-powered room visualization.', 'Service', [], '$NTR', 100, []), type: 'domain' as const },
+    {
+      // Using createProjectStub for consistency, then overriding/adding specific fields
+      ...createProjectStub(
+        21, // New unique ID
+        'Marina3D.xyz', // Title
+        'Cutting-edge 3D visualization and interactive experiences for the web.', // Description
+        'Live', // Status
+        ['Next.js', 'TypeScript', 'Three.js', 'WebGL'], // Example Tech Stack (customize as needed)
+        undefined, // tokenName (undefined if not applicable)
+        0, // tokenProgressPercent (0 if not applicable)
+        ['/images/clientprojects/marina3d-xyz/slug/mar3D_logo.png'] // Updated image path
+      ),
+      type: 'domain' as const, // Ensure it's treated as a domain project
+      liveUrl: 'https://marina3d.xyz', // Specific live URL
+      subtitle: 'Interactive 3D Web Experiences' // Example subtitle
+    },
 
     // GitHub Repos
     {

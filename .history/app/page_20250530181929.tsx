@@ -292,7 +292,7 @@ export default function PortfolioPage() {
                     </div>
 
                     {/* Main image/avatar area - this is the small circular logo */}
-                    <div className="absolute top-3 left-3 z-20 w-20 h-20 flex items-start justify-start">
+                    <div className="absolute top-3 left-3 z-20 w-20 h-20 flex items-center justify-center">
                       {primaryImageUrl && (
                         <ProjectCardImage 
                           imageUrls={project.cardImageUrls!}

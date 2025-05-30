@@ -229,11 +229,22 @@ export default function PortfolioPage() {
               const primaryImageUrl = project.cardImageUrls && project.cardImageUrls.length > 0 ? project.cardImageUrls[0] : null;
               return (
                 <div 
-                  key={project.id}
-                  className="relative group bg-white dark:bg-black border border-gray-200 dark:border-gray-800 shadow-md dark:shadow-xl flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:brightness-105 dark:hover:brightness-110"
+                  key={project.id} 
+                  className="relative group bg-white dark:bg-black border border-gray-200 dark:border-gray-800 shadow-md dark:shadow-xl flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:brightness-105 dark:hover:brightness-110 bg-no-repeat"
+                  style={primaryImageUrl ? { 
+                    backgroundImage: `url(${primaryImageUrl})`,
+                  } : {}}
                   onMouseEnter={() => setHoveredProjectId(project.id)}
                   onMouseLeave={() => setHoveredProjectId(null)}
                 >
+                  {/* Overlay 1: To make the background image an echo (overall faintness) */}
+                  <div className="absolute inset-0 bg-white/90 dark:bg-black/90 z-0"></div>
+
+                  {/* Overlay 2: To fade the bottom of the background image (optional, can be tricky) */}
+                  {/* This gradient should go from transparent at the top to card bg color at the bottom */}
+                  {/* The effectiveness of this depends on the background image and overall card bg */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white dark:from-black to-transparent z-[1]"></div>
+
                   {/* Content wrapper - sits on top of all overlays */}
                   <div className="relative z-10 flex flex-col flex-grow p-6 overflow-auto"> 
                     {/* Persistent Social Links Bar (z-20 relative to this z-10 container) */}
@@ -292,7 +303,7 @@ export default function PortfolioPage() {
                     </div>
 
                     {/* Main image/avatar area - this is the small circular logo */}
-                    <div className="absolute top-3 left-3 z-20 w-20 h-20 flex items-start justify-start">
+                    <div className="relative w-20 h-20 mx-auto flex items-center justify-center mb-4">
                       {primaryImageUrl && (
                         <ProjectCardImage 
                           imageUrls={project.cardImageUrls!}
@@ -302,7 +313,7 @@ export default function PortfolioPage() {
                     </div>
 
                     {/* Text content area */}
-                    <div className="flex flex-col flex-grow mt-16">
+                    <div className="flex flex-col flex-grow"> 
                       <h3 className="text-lg font-semibold text-black dark:text-white mb-1">
                         <a 
                           href={project.liveUrl || '#'} 
